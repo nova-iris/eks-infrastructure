@@ -42,3 +42,62 @@ variable "default_tags" {
     Project     = "eks-infrastructure"
   }
 }
+
+variable "eks_managed_node_groups" {
+  description = "Map of EKS managed node group configurations"
+  type = object({
+    min_size       = number
+    max_size       = number
+    desired_size   = number
+    instance_types = list(string)
+    capacity_type  = string
+    node_labels    = map(string)
+  })
+  default = {
+    min_size       = 1
+    max_size       = 3
+    desired_size   = 2
+    instance_types = ["t3.medium"]
+    capacity_type  = "ON_DEMAND"
+    node_labels = {
+      "cluster-autoscaler-enabled" = "true"
+    }
+  }
+}
+
+variable "cluster_addons" {
+  description = "Map of cluster addon configurations to enable for the cluster"
+  type        = any
+  default = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent          = true
+      configuration_values = "{\"env\":{\"WARM_ENI_TARGET\":\"2\",\"WARM_IP_TARGET\":\"5\"}}"
+    }
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
+  }
+}
+
+variable "route53_hosted_zone_id" {
+  description = "ID of the Route53 hosted zone for external-dns"
+  type        = string
+}
+
+variable "cert_manager_version" {
+  description = "Version of the cert-manager Helm chart"
+  type        = string
+  default     = "v1.14.3"
+}
+
+variable "external_dns_version" {
+  description = "Version of the external-dns Helm chart"
+  type        = string
+  default     = "1.14.0"
+}

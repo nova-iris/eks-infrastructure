@@ -19,44 +19,81 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
+variable "node_group" {
+  description = "Configuration for the EKS managed node group"
+  type = object({
+    min_size       = number
+    max_size       = number
+    desired_size   = number
+    instance_types = list(string)
+    capacity_type  = string
+    node_labels    = map(string)
+  })
+  default = {
+    min_size       = 1
+    max_size       = 3
+    desired_size   = 2
+    instance_types = ["t3.medium"]
+    capacity_type  = "ON_DEMAND"
+    node_labels    = {}
+  }
+}
+
+# Keeping these for backwards compatibility, they'll be removed in future versions
 variable "min_size" {
-  description = "Minimum number of nodes in the node group"
+  description = "Minimum number of nodes in the node group (deprecated, use node_group.min_size)"
   type        = number
-  default     = 1
+  default     = null
 }
 
 variable "max_size" {
-  description = "Maximum number of nodes in the node group"
+  description = "Maximum number of nodes in the node group (deprecated, use node_group.max_size)"
   type        = number
-  default     = 3
+  default     = null
 }
 
 variable "desired_size" {
-  description = "Desired number of nodes in the node group"
+  description = "Desired number of nodes in the node group (deprecated, use node_group.desired_size)"
   type        = number
-  default     = 2
+  default     = null
 }
 
 variable "instance_types" {
-  description = "List of instance types for the node group"
+  description = "List of instance types for the node group (deprecated, use node_group.instance_types)"
   type        = list(string)
-  default     = ["t3.medium"]
+  default     = null
 }
 
 variable "capacity_type" {
-  description = "Type of capacity associated with the EKS Node Group. Valid values: ON_DEMAND, SPOT"
+  description = "Type of capacity associated with the EKS Node Group (deprecated, use node_group.capacity_type)"
   type        = string
-  default     = "ON_DEMAND"
+  default     = null
 }
 
 variable "node_labels" {
-  description = "Labels to apply to the node group"
+  description = "Labels to apply to the node group (deprecated, use node_group.node_labels)"
   type        = map(string)
-  default     = {}
+  default     = null
 }
 
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
+}
+
+variable "cluster_addons" {
+  description = "Map of cluster addon configurations to enable for the cluster"
+  type        = any
+  default = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+  }
 }

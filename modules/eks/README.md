@@ -20,12 +20,38 @@ module "eks" {
   vpc_id          = "vpc-xxxxxx"
   subnet_ids      = ["subnet-xxxxx", "subnet-yyyy"]
 
-  min_size     = 1
-  max_size     = 3
-  desired_size = 2
+  # Object-based node group configuration
+  node_group = {
+    min_size       = 1
+    max_size       = 3
+    desired_size   = 2
+    instance_types = ["t3.medium"]
+    capacity_type  = "ON_DEMAND"
+    node_labels    = {
+      "cluster-autoscaler-enabled" = "true"
+    }
+  }
 
-  instance_types = ["t3.medium"]
-  capacity_type  = "ON_DEMAND"
+  # EKS cluster addons
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+      configuration_values = jsonencode({
+        env = {
+          WARM_IP_TARGET = "5"
+        }
+      })
+    }
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
+  }
 
   tags = {
     Environment = "production"
@@ -42,12 +68,8 @@ module "eks" {
 | cluster_version | Kubernetes version to use for the EKS cluster | string | "1.27" | no |
 | vpc_id | VPC where the cluster and workers will be deployed | string | n/a | yes |
 | subnet_ids | List of subnet IDs where workers can be created | list(string) | n/a | yes |
-| min_size | Minimum number of nodes in the node group | number | 1 | no |
-| max_size | Maximum number of nodes in the node group | number | 3 | no |
-| desired_size | Desired number of nodes in the node group | number | 2 | no |
-| instance_types | List of instance types for the node group | list(string) | ["t3.medium"] | no |
-| capacity_type | Type of capacity associated with the EKS Node Group | string | "ON_DEMAND" | no |
-| node_labels | Labels to apply to the node group | map(string) | {} | no |
+| node_group | Object-based configuration for the node group | object({ min_size = number, max_size = number, desired_size = number, instance_types = list(string), capacity_type = string, node_labels = map(string) }) | { min_size = 1, max_size = 3, desired_size = 2, instance_types = ["t3.medium"], capacity_type = "ON_DEMAND", node_labels = {} } | no |
+| cluster_addons | Configuration for EKS cluster addons | map(object({ most_recent = bool, configuration_values = string })) | {} | no |
 | tags | A map of tags to add to all resources | map(string) | {} | no |
 
 ## Outputs

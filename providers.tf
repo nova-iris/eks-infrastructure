@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = ">= 2.0"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.5.0"
+    }
   }
 
   backend "local" {}
@@ -19,4 +23,20 @@ provider "aws" {
   region     = var.aws_region
   access_key = var.aws_access_key
   secret_key = var.aws_secret_key
+}
+
+# Using the token directly from the EKS module
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  token                  = module.eks.cluster_token
+}
+
+# Using the token directly from the EKS module for Helm provider
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    token                  = module.eks.cluster_token
+  }
 }

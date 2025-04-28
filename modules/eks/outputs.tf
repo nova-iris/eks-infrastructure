@@ -27,3 +27,14 @@ output "node_security_group_id" {
   description = "Security group ID attached to the EKS nodes"
   value       = module.eks.node_security_group_id
 }
+
+output "cluster_oidc_issuer_url" {
+  description = "The URL on the EKS cluster for the OpenID Connect identity provider"
+  value       = module.eks.cluster_oidc_issuer_url
+}
+
+output "cluster_token" {
+  description = "The token to use for authentication with the Kubernetes API"
+  value       = data.aws_eks_cluster_auth.this.token
+  sensitive   = true
+}

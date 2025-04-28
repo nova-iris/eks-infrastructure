@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# eks-infrastructure
-EKS infrastructure as code using Terraform
-=======
 # EKS Infrastructure
 
 This Terraform project provisions an Amazon EKS (Elastic Kubernetes Service) cluster along with the necessary AWS infrastructure components.
@@ -65,4 +61,3 @@ terraform destroy
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
->>>>>>> da3ad9f (Initial commit of EKS infrastructure)
