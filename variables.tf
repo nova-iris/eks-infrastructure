@@ -93,11 +93,17 @@ variable "route53_hosted_zone_id" {
 variable "cert_manager_version" {
   description = "Version of the cert-manager Helm chart"
   type        = string
-  default     = "v1.14.3"
+  default     = "v1.17.1"
 }
 
 variable "external_dns_version" {
   description = "Version of the external-dns Helm chart"
   type        = string
   default     = "1.14.0"
+}
+
+variable "argocd_version" {
+  description = "Version of the ArgoCD Helm chart"
+  type        = string
+  default     = "5.51.4"
 }
