@@ -105,5 +105,5 @@ variable "external_dns_version" {
 variable "argocd_version" {
   description = "Version of the ArgoCD Helm chart"
   type        = string
-  default     = "5.51.4"
+  default     = "7.8.15"
 }

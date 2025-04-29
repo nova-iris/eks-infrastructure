@@ -229,14 +229,14 @@ resource "aws_iam_role" "load_balancer_controller" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}"
+          Federated = module.eks.oidc_provider_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          StringEquals = {
-            "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
-          }
-        }
+        # Condition = {
+        #   StringEquals = {
+        #     "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        #   }
+        # }
       }
     ]
   })

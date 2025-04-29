@@ -18,7 +18,6 @@ resource "aws_iam_policy" "argocd" {
     ]
   })
 }
-
 resource "aws_iam_role" "argocd" {
   name = "${var.cluster_name}-argocd-role"
 
@@ -28,14 +27,9 @@ resource "aws_iam_role" "argocd" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}"
+          Federated = module.eks.oidc_provider_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          StringEquals = {
-            "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:argocd:argocd-server"
-          }
-        }
       }
     ]
   })
@@ -46,6 +40,27 @@ resource "aws_iam_role_policy_attachment" "argocd" {
   role       = aws_iam_role.argocd.name
 }
 
+# Explicit Certificate resource to fix domain name mismatch
+resource "kubectl_manifest" "argocd_certificate" {
+  depends_on = [helm_release.cert_manager, kubectl_manifest.letsencrypt_staging_issuer]
+
+  yaml_body = <<YAML
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-tls-cert
+  namespace: argocd
+spec:
+  secretName: argocd-tls-cert
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: argocd.novairis.dev
+  dnsNames:
+  - argocd.novairis.dev
+YAML
+}
+
 # ArgoCD Helm Release
 resource "helm_release" "argocd" {
   name             = "argocd"
@@ -54,7 +69,7 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   version          = var.argocd_version
   create_namespace = true
-  depends_on       = [aws_iam_role_policy_attachment.argocd]
+  depends_on       = [aws_iam_role_policy_attachment.argocd, kubectl_manifest.letsencrypt_staging_issuer]
 
   # High availability configuration
   set {
@@ -139,9 +154,10 @@ resource "helm_release" "argocd" {
     value = "argocd.novairis.dev"
   }
 
+  # Add annotations for DNS01 validation
   set {
-    name  = "server.ingress.annotations.cert-manager\\.io/cluster-issuer"
-    value = "letsencrypt-direct"
+    name  = "server.ingress.annotations.cert-manager\\.io/common-name"
+    value = "argocd.novairis.dev"
   }
 
   # Configure service account with IRSA
@@ -164,5 +180,11 @@ resource "helm_release" "argocd" {
   set {
     name  = "server.service.type"
     value = "ClusterIP"
+  }
+
+  # Additional troubleshooting settings when needed
+  set {
+    name  = "server.config.resource\\.customizations\\.health\\.certmanager\\.cert-manager\\.io_Certificate"
+    value = "jsonpath: '{.status.conditions[0].status}'"
   }
 }

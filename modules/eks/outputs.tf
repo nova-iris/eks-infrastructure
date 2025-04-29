@@ -38,3 +38,8 @@ output "cluster_token" {
   value       = data.aws_eks_cluster_auth.this.token
   sensitive   = true
 }
+
+output "oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider for the EKS cluster"
+  value       = module.eks.oidc_provider_arn
+}

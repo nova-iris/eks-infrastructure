@@ -18,7 +18,8 @@ resource "aws_iam_policy" "external_dns" {
         Effect = "Allow"
         Action = [
           "route53:ListHostedZones",
-          "route53:ListResourceRecordSets"
+          "route53:ListResourceRecordSets",
+          "route53:ListTagsForResources",
         ]
         Resource = ["*"]
       }
@@ -35,7 +36,7 @@ resource "aws_iam_role" "external_dns" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}"
+          Federated = module.eks.oidc_provider_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -53,8 +54,24 @@ resource "aws_iam_role_policy_attachment" "external_dns" {
   role       = aws_iam_role.external_dns.name
 }
 
+# Explicitly create service account for external-dns
+resource "kubectl_manifest" "external_dns_sa" {
+  yaml_body = <<YAML
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-dns
+  namespace: kube-system
+  annotations:
+    eks.amazonaws.com/role-arn: ${aws_iam_role.external_dns.arn}
+YAML
+}
+
 resource "helm_release" "external_dns" {
-  depends_on = [aws_iam_role_policy_attachment.external_dns]
+  depends_on = [
+    aws_iam_role_policy_attachment.external_dns,
+    kubectl_manifest.external_dns_sa
+  ]
 
   name       = "external-dns"
   repository = "https://kubernetes-sigs.github.io/external-dns"
@@ -72,9 +89,10 @@ resource "helm_release" "external_dns" {
     value = "public"
   }
 
+  # Don't create service account since we're creating it explicitly
   set {
     name  = "serviceAccount.create"
-    value = "true"
+    value = "false"
   }
 
   set {
@@ -82,9 +100,16 @@ resource "helm_release" "external_dns" {
     value = "external-dns"
   }
 
+  # No need for annotation as we're managing the service account separately
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.external_dns.arn
+    value = ""
+  }
+
+  # Let Helm manage RBAC resources
+  set {
+    name  = "rbac.create"
+    value = "true"
   }
 
   set {
