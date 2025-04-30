@@ -1,0 +1,44 @@
+# HA mode without autoscaling
+redis-ha:
+  enabled: true
+
+controller:
+  replicas: 1
+
+server:
+  replicas: 2
+
+repoServer:
+  replicas: 2
+
+applicationSet:
+  replicas: 2
+
+# Ingress configuration
+global:
+  domain: argocd.novairis.dev
+
+configs:
+  params:
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    controller: aws
+    ingressClassName: alb
+    annotations:
+      # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/target-type: "ip"
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+    aws: 
+      serviceType: ClusterIP
+      backendprotocol: GRPC
+    extraTls:
+      - hosts:
+        - argocd.novairis.dev
+        # Based on the ingress controller used secret might be optional
+        secretName: argocd-tls-cert

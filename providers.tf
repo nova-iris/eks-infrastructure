@@ -29,26 +29,38 @@ provider "aws" {
   secret_key = var.aws_secret_key
 }
 
-# Using the token directly from the EKS module
+# Using the token from the infrastructure module
 provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = module.eks.cluster_token
-}
-
-# Using the token directly from the EKS module for Helm provider
-provider "helm" {
-  kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    token                  = module.eks.cluster_token
+  host                   = module.infrastructure.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.infrastructure.cluster_certificate_authority_data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.infrastructure.cluster_id, "--region", var.aws_region]
   }
 }
 
-# Using the token directly from the EKS module for kubectl provider
+# Using the token from the infrastructure module for Helm provider
+provider "helm" {
+  kubernetes {
+    host                   = module.infrastructure.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.infrastructure.cluster_certificate_authority_data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.infrastructure.cluster_id, "--region", var.aws_region]
+    }
+  }
+}
+
+# Using the token from the infrastructure module for kubectl provider
 provider "kubectl" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = module.eks.cluster_token
+  host                   = module.infrastructure.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.infrastructure.cluster_certificate_authority_data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.infrastructure.cluster_id, "--region", var.aws_region]
+  }
   load_config_file       = false
 }
