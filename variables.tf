@@ -53,10 +53,11 @@ variable "eks_managed_node_groups" {
     capacity_type  = string
     node_labels    = map(string)
   })
+
   default = {
     min_size       = 1
-    max_size       = 3
-    desired_size   = 2
+    max_size       = 5
+    desired_size   = 3
     instance_types = ["t3.medium"]
     capacity_type  = "ON_DEMAND"
     node_labels = {
