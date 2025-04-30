@@ -11,11 +11,11 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "iam:CreateServiceLinkedRole"
         ]
         Resource = "*"
-        Condition = {
-          StringEquals = {
-            "iam:AWSServiceName" = "elasticloadbalancing.amazonaws.com"
-          }
-        }
+        # Condition = {
+        #   StringEquals = {
+        #     "iam:AWSServiceName" = "elasticloadbalancing.amazonaws.com"
+        #   }
+        # }
       },
       {
         Effect = "Allow"
@@ -41,7 +41,8 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "elasticloadbalancing:DescribeTargetGroups",
           "elasticloadbalancing:DescribeTargetGroupAttributes",
           "elasticloadbalancing:DescribeTargetHealth",
-          "elasticloadbalancing:DescribeTags"
+          "elasticloadbalancing:DescribeTags",
+          "elasticloadbalancing:DescribeListenerAttributes"
         ]
         Resource = "*"
       },
@@ -89,14 +90,14 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "ec2:CreateTags"
         ]
         Resource = "arn:aws:ec2:*:*:security-group/*"
-        Condition = {
-          StringEquals = {
-            "ec2:CreateAction" = "CreateSecurityGroup"
-          }
-          Null = {
-            "aws:RequestTag/elbv2.k8s.aws/cluster" = "false"
-          }
-        }
+        # Condition = {
+        #   StringEquals = {
+        #     "ec2:CreateAction" = "CreateSecurityGroup"
+        #   }
+        #   Null = {
+        #     "aws:RequestTag/elbv2.k8s.aws/cluster" = "false"
+        #   }
+        # }
       },
       {
         Effect = "Allow"
@@ -105,12 +106,12 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "ec2:DeleteTags"
         ]
         Resource = "arn:aws:ec2:*:*:security-group/*"
-        Condition = {
-          Null = {
-            "aws:RequestTag/elbv2.k8s.aws/cluster"  = "true"
-            "aws:ResourceTag/elbv2.k8s.aws/cluster" = "false"
-          }
-        }
+        # Condition = {
+        #   Null = {
+        #     "aws:RequestTag/elbv2.k8s.aws/cluster"  = "true"
+        #     "aws:ResourceTag/elbv2.k8s.aws/cluster" = "false"
+        #   }
+        # }
       },
       {
         Effect = "Allow"
@@ -120,11 +121,11 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "ec2:DeleteSecurityGroup"
         ]
         Resource = "*"
-        Condition = {
-          Null = {
-            "aws:ResourceTag/elbv2.k8s.aws/cluster" = "false"
-          }
-        }
+        # Condition = {
+        #   Null = {
+        #     "aws:ResourceTag/elbv2.k8s.aws/cluster" = "false"
+        #   }
+        # }
       },
       {
         Effect = "Allow"
@@ -133,11 +134,11 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "elasticloadbalancing:CreateTargetGroup"
         ]
         Resource = "*"
-        Condition = {
-          Null = {
-            "aws:RequestTag/elbv2.k8s.aws/cluster" = "false"
-          }
-        }
+        # Condition = {
+        #   Null = {
+        #     "aws:RequestTag/elbv2.k8s.aws/cluster" = "false"
+        #   }
+        # }
       },
       {
         Effect = "Allow"
@@ -159,12 +160,6 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "arn:aws:elasticloadbalancing:*:*:loadbalancer/*",
           "arn:aws:elasticloadbalancing:*:*:targetgroup/*"
         ]
-        Condition = {
-          Null = {
-            "aws:RequestTag/elbv2.k8s.aws/cluster"  = "true"
-            "aws:ResourceTag/elbv2.k8s.aws/cluster" = "false"
-          }
-        }
       },
       {
         Effect = "Allow"
@@ -179,11 +174,11 @@ resource "aws_iam_policy" "load_balancer_controller" {
           "elasticloadbalancing:DeleteTargetGroup"
         ]
         Resource = "*"
-        Condition = {
-          Null = {
-            "aws:ResourceTag/elbv2.k8s.aws/cluster" = "false"
-          }
-        }
+        # Condition = {
+        #   Null = {
+        #     "aws:ResourceTag/elbv2.k8s.aws/cluster" = "false"
+        #   }
+        # }
       },
       {
         Effect = "Allow"
@@ -232,11 +227,6 @@ resource "aws_iam_role" "load_balancer_controller" {
           Federated = module.eks.oidc_provider_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
-        # Condition = {
-        #   StringEquals = {
-        #     "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
-        #   }
-        # }
       }
     ]
   })

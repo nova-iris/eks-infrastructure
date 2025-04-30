@@ -71,120 +71,12 @@ resource "helm_release" "argocd" {
   create_namespace = true
   depends_on       = [aws_iam_role_policy_attachment.argocd, kubectl_manifest.letsencrypt_staging_issuer]
 
-  # High availability configuration
-  set {
-    name  = "controller.replicas"
-    value = "2"
-  }
+  # Use values file instead of individual set blocks
+  values = [file("${path.module}/argocd_values.yaml")]
 
+  # Only set the cluster name dynamically
   set {
-    name  = "server.replicas"
-    value = "2"
-  }
-
-  set {
-    name  = "repoServer.replicas"
-    value = "2"
-  }
-
-  set {
-    name  = "applicationSet.replicas"
-    value = "2"
-  }
-
-  # Enable TLS for ArgoCD using cert-manager
-  set {
-    name  = "server.ingress.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "server.ingress.ingressClassName"
-    value = "alb"
-  }
-
-  set {
-    name  = "server.ingress.hosts[0]"
-    value = "argocd.novairis.dev"
-  }
-
-  set {
-    name  = "server.ingress.tls[0].hosts[0]"
-    value = "argocd.novairis.dev"
-  }
-
-  set {
-    name  = "server.ingress.tls[0].secretName"
-    value = "argocd-tls-cert"
-  }
-
-  # Enhanced ALB annotations
-  set {
-    name  = "server.ingress.annotations.kubernetes\\.io/ingress\\.class"
-    value = "alb"
-  }
-
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme"
-    value = "internet-facing"
-  }
-
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type"
-    value = "ip"
-  }
-
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports"
-    value = "[{\"HTTPS\": 443}]"
-  }
-
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
-    value = "dummy-value" # This will be overridden by cert-manager
-  }
-
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name"
-    value = "argocd-ingress-group"
-  }
-
-  set {
-    name  = "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-    value = "argocd.novairis.dev"
-  }
-
-  # Add annotations for DNS01 validation
-  set {
-    name  = "server.ingress.annotations.cert-manager\\.io/common-name"
-    value = "argocd.novairis.dev"
-  }
-
-  # Configure service account with IRSA
-  set {
-    name  = "server.serviceAccount.create"
-    value = "true"
-  }
-
-  set {
-    name  = "server.serviceAccount.name"
-    value = "argocd-server"
-  }
-
-  set {
-    name  = "server.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.argocd.arn
-  }
-
-  # Make sure ArgoCD server service is configured correctly
-  set {
-    name  = "server.service.type"
-    value = "ClusterIP"
-  }
-
-  # Additional troubleshooting settings when needed
-  set {
-    name  = "server.config.resource\\.customizations\\.health\\.certmanager\\.cert-manager\\.io_Certificate"
-    value = "jsonpath: '{.status.conditions[0].status}'"
+    name  = "clusterName"
+    value = var.cluster_name
   }
 }
