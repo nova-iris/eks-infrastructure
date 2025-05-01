@@ -41,9 +41,28 @@ resource "aws_iam_role_policy_attachment" "argocd" {
   role       = aws_iam_role.argocd.name
 }
 
+# ArgoCD Helm Release - Must come before certificate creation
+resource "helm_release" "argocd" {
+  depends_on = [helm_release.cert_manager]
+
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  namespace        = "argocd"
+  version          = var.argocd_version
+  create_namespace = true
+
+  values = [file("${path.module}/values/argocd.yaml")]
+}
+
 # Explicit Certificate resource to fix domain name mismatch
+# Now depends on ArgoCD helm release to ensure namespace exists
 resource "kubectl_manifest" "argocd_certificate" {
-  depends_on = [helm_release.cert_manager, kubectl_manifest.letsencrypt_staging_issuer]
+  depends_on = [
+    helm_release.cert_manager,
+    kubectl_manifest.letsencrypt_staging_issuer,
+    helm_release.argocd # Added dependency to ensure namespace exists
+  ]
 
   yaml_body = <<YAML
 apiVersion: cert-manager.io/v1
@@ -60,18 +79,4 @@ spec:
   dnsNames:
   - argocd.novairis.dev
 YAML
-}
-
-# ArgoCD Helm Release
-resource "helm_release" "argocd" {
-  depends_on = [helm_release.cert_manager]
-
-  name             = "argocd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  namespace        = "argocd"
-  version          = var.argocd_version
-  create_namespace = true
-
-  values = [file("${path.module}/../applications/values/argocd_values.yaml")]
 }

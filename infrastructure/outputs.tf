@@ -33,6 +33,12 @@ output "cluster_certificate_authority_data" {
   value       = module.eks.cluster_certificate_authority_data
 }
 
+output "cluster_token" {
+  description = "The token to use to authenticate with the cluster"
+  value       = module.eks.cluster_token
+  sensitive   = true
+}
+
 output "vpc_id" {
   description = "VPC ID"
   value       = module.vpc.vpc_id

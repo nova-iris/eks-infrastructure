@@ -26,13 +26,13 @@ variable "vpc_id" {
 variable "cert_manager_version" {
   description = "Version of cert-manager to install"
   type        = string
-  default     = "v1.14.4"
+  default     = "v1.17.1"
 }
 
 variable "aws_load_balancer_controller_version" {
   description = "Version of AWS Load Balancer Controller to install"
   type        = string
-  default     = "1.7.0"
+  default     = "1.12.0"
 }
 
 variable "external_dns_version" {
@@ -44,5 +44,5 @@ variable "external_dns_version" {
 variable "argocd_version" {
   description = "Version of ArgoCD to install"
   type        = string
-  default     = "5.46.7"
+  default     = "7.8.15"
 }

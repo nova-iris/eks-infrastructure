@@ -71,11 +71,12 @@ YAML
 resource "helm_release" "external_dns" {
   depends_on = [aws_iam_role_policy_attachment.external_dns]
 
-  name       = "external-dns"
-  repository = "https://kubernetes-sigs.github.io/external-dns/"
-  chart      = "external-dns"
-  namespace  = "kube-system"
-  version    = var.external_dns_version
+  name             = "external-dns"
+  repository       = "https://kubernetes-sigs.github.io/external-dns/"
+  chart            = "external-dns"
+  namespace        = "kube-system"
+  version          = var.external_dns_version
+  create_namespace = true
 
   set {
     name  = "provider"
