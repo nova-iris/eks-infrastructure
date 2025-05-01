@@ -224,9 +224,14 @@ resource "aws_iam_role" "load_balancer_controller" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = module.eks.oidc_provider_arn
+          Federated = var.eks_oidc_provider_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
+        # Condition = {
+        #   StringEquals = {
+        #     "${replace(var.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        #   }
+        # }
       }
     ]
   })
@@ -244,7 +249,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
   namespace  = "kube-system"
-  version    = "1.12.0"
+  version    = var.aws_load_balancer_controller_version
 
   set {
     name  = "clusterName"
@@ -273,6 +278,6 @@ resource "helm_release" "aws_load_balancer_controller" {
 
   set {
     name  = "vpcId"
-    value = module.vpc.vpc_id
+    value = var.vpc_id
   }
 }

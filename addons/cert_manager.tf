@@ -37,12 +37,12 @@ resource "aws_iam_role" "cert_manager_dns01" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = module.eks.oidc_provider_arn
+          Federated = var.eks_oidc_provider_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         # Condition = {
         #   StringEquals = {
-        #     "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:cert-manager:cert-manager-acme-dns01-route53"
+        #     "${replace(var.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:cert-manager:cert-manager-acme-dns01-route53"
         #   }
         # }
       }
@@ -82,18 +82,6 @@ resource "helm_release" "cert_manager" {
     name  = "serviceAccount.name"
     value = "cert-manager"
   }
-
-  #   # Enable for troubleshooting
-  #   set {
-  #     name  = "global.logLevel"
-  #     value = "4"
-  #   }
-
-  #   # Enable leader election to ensure high availability
-  #   set {
-  #     name  = "leaderElection.namespace"
-  #     value = "cert-manager"
-  #   }
 }
 
 # Create service account for DNS01 Route53 integration

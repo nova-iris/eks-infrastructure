@@ -1,33 +1,47 @@
-data "aws_caller_identity" "current" {}
+# Main entrypoint for the EKS infrastructure
+# Organizes resources into logical modules for better maintainability
 
-data "aws_availability_zones" "available" {
-  state = "available"
+# Core infrastructure module (VPC, EKS)
+module "infrastructure" {
+  source = "./infrastructure"
+
+  cluster_name            = var.cluster_name
+  cluster_version         = var.cluster_version
+  vpc_cidr                = var.vpc_cidr
+  aws_region              = var.aws_region
+  eks_managed_node_groups = var.eks_managed_node_groups
+  cluster_addons          = var.cluster_addons
+  default_tags            = var.default_tags
+  route53_hosted_zone_id  = var.route53_hosted_zone_id
 }
 
-module "vpc" {
-  source = "./modules/vpc"
+# Cluster add-ons module (Load Balancer Controller, External DNS, Cert Manager, ArgoCD)
+module "addons" {
+  source = "./addons"
 
-  vpc_name = var.cluster_name
-  vpc_cidr = var.vpc_cidr
-  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+  cluster_name            = var.cluster_name
+  aws_region              = var.aws_region
+  eks_oidc_provider_arn   = module.infrastructure.oidc_provider_arn
+  cluster_oidc_issuer_url = module.infrastructure.cluster_oidc_issuer_url
+  vpc_id                  = module.infrastructure.vpc_id
 
-  tags = var.default_tags
+  depends_on = [module.infrastructure]
 }
 
-module "eks" {
-  source = "./modules/eks"
+# Applications module - For deploying applications to the cluster
+module "applications" {
+  source = "./applications"
 
-  cluster_name    = var.cluster_name
-  cluster_version = var.cluster_version
+  # Only deploy this when needed - commented out by default
+  count = 0
 
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  cluster_name            = var.cluster_name
+  aws_region              = var.aws_region
+  vpc_id                  = module.infrastructure.vpc_id
+  eks_oidc_provider_arn   = module.infrastructure.oidc_provider_arn
+  cluster_oidc_issuer_url = module.infrastructure.cluster_oidc_issuer_url
+  route53_zone_id         = module.infrastructure.route53_zone_id
+  route53_zone_name       = module.infrastructure.route53_zone_name
 
-  # Use the eks_managed_node_groups variable directly
-  node_group = var.eks_managed_node_groups
-
-  # Configure cluster addons
-  cluster_addons = var.cluster_addons
-
-  tags = var.default_tags
+  depends_on = [module.addons]
 }
