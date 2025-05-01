@@ -30,20 +30,31 @@ eks-infrastructure/
 │   ├── external_dns.tf              # External DNS
 │   ├── argocd.tf                    # ArgoCD
 │   ├── variables.tf                 # Add-ons variables
-│   └── versions.tf                  # Terraform and provider versions
+│   ├── versions.tf                  # Terraform and provider versions
+│   └── values/                      # Helm values files
+│       └── argocd.yaml              # ArgoCD values
 │
 ├── applications/          # Application deployments
 │   ├── main.tf            # Applications orchestration
 │   ├── variables.tf       # Applications variables
 │   ├── versions.tf        # Terraform and provider versions
 │   └── values/            # Helm values files
-│       └── argocd_values.yaml       # ArgoCD values
+│
+├── backup/                # Backup of previous configurations
+│   ├── argocd_values.yaml          # Backup of ArgoCD values
+│   ├── argocd.tf                   # Backup of ArgoCD configuration
+│   ├── cert_manager.tf             # Backup of cert-manager configuration
+│   ├── external_dns.tf             # Backup of External DNS configuration
+│   ├── helm.tf                     # Backup of Helm configuration
+│   ├── load_balancer_controller.tf # Backup of AWS ALB Controller configuration
+│   └── route53.tf                  # Backup of Route53 configuration
 │
 └── modules/               # Reusable modules
     ├── eks/               # EKS module
     │   ├── main.tf
     │   ├── variables.tf
-    │   └── outputs.tf
+    │   ├── outputs.tf
+    │   └── README.md      # EKS module documentation
     └── vpc/               # VPC module
         ├── main.tf
         ├── variables.tf
@@ -60,15 +71,20 @@ Contains all the core infrastructure components:
 
 ### Addons Module
 Contains all the Kubernetes add-ons deployed via Helm:
-- AWS Load Balancer Controller
-- External DNS for Route53 integration
-- cert-manager for certificate management
-- ArgoCD for GitOps
+- AWS Load Balancer Controller (Version: 1.12.0)
+- External DNS for Route53 integration (Version: 6.20.0)
+- cert-manager for certificate management (Version: v1.17.1)
+- ArgoCD for GitOps (Version: 7.8.15)
 
 ### Applications Module
 For deploying applications to the cluster:
 - Organized by team or domain
 - Helm values stored in a central location
+
+### Backup Directory
+Contains backup copies of previous configurations:
+- Used for reference and rollback if needed
+- Includes previous versions of Helm charts and configurations
 
 ## Usage
 
@@ -108,9 +124,21 @@ When adding new applications to be deployed to the cluster:
 
 This structure helps keep your codebase clean as you add more applications to the cluster.
 
+## Component Versions
+
+The following component versions are currently deployed:
+
+| Component | Version |
+|-----------|---------|
+| AWS Load Balancer Controller | 1.12.0 |
+| External DNS | 6.20.0 |
+| cert-manager | v1.17.1 |
+| ArgoCD | 7.8.15 |
+
 ## Maintenance
 
 When making changes to the infrastructure:
 - Use the modular structure to isolate changes
 - Update the README if you modify the structure
 - Run `terraform fmt` before committing changes
+- Ensure version updates are reflected in the component versions section
