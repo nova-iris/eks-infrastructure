@@ -19,11 +19,13 @@ module "infrastructure" {
 module "addons" {
   source = "./addons"
 
-  cluster_name            = var.cluster_name
-  aws_region              = var.aws_region
-  eks_oidc_provider_arn   = module.infrastructure.oidc_provider_arn
-  cluster_oidc_issuer_url = module.infrastructure.cluster_oidc_issuer_url
-  vpc_id                  = module.infrastructure.vpc_id
+  cluster_name              = var.cluster_name
+  aws_region                = var.aws_region
+  eks_oidc_provider_arn     = module.infrastructure.oidc_provider_arn
+  cluster_oidc_issuer_url   = module.infrastructure.cluster_oidc_issuer_url
+  vpc_id                    = module.infrastructure.vpc_id
+  enable_cluster_autoscaler = var.enable_cluster_autoscaler
+  cluster_autoscaler_version = var.cluster_autoscaler_version
 
   depends_on = [module.infrastructure]
 }

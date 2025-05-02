@@ -58,3 +58,15 @@ variable "external_secrets_version" {
   type        = string
   default     = "0.9.9"
 }
+
+variable "cluster_autoscaler_version" {
+  description = "Version of Cluster Autoscaler to install"
+  type        = string
+  default     = "9.29.3"
+}
+
+variable "enable_cluster_autoscaler" {
+  description = "Whether to enable the Kubernetes Cluster Autoscaler"
+  type        = bool
+  default     = true
+}

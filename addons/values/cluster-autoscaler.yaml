@@ -1,0 +1,82 @@
+# Cluster Autoscaler Configuration
+# Documentation: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
+
+# Use AWS as cloud provider
+cloudProvider: aws
+
+# Use auto-discovery of node groups instead of specifying each ASG
+autoDiscovery:
+  clusterName: ${cluster_name}
+  tags:
+    - k8s.io/cluster-autoscaler/enabled
+    - k8s.io/cluster-autoscaler/${cluster_name}
+
+# AWS specific settings
+awsRegion: ${aws_region}
+
+# Enable scanning of pod resources to estimate resource requirements
+extraArgs:
+  # Scale down parameters for better stability
+  scale-down-delay-after-add: 5m
+  scale-down-unneeded-time: 5m
+  # Scan interval and timeout settings
+  scan-interval: 10s
+  max-nodes-total: 20
+  expander: least-waste
+  balance-similar-node-groups: true
+  skip-nodes-with-system-pods: true
+  skip-nodes-with-local-storage: false
+  # Logging parameters
+  v: 4
+
+# Image configuration
+image:
+  repository: registry.k8s.io/autoscaling/cluster-autoscaler
+  # Version tag will be set automatically by Helm chart based on k8s version
+
+rbac:
+  create: true
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: ${role_arn}
+    automountServiceAccountToken: true
+
+# Set priority class to system-cluster-critical to avoid eviction
+priorityClassName: system-cluster-critical
+
+# Resources for the autoscaler pod
+resources:
+  limits:
+    cpu: 200m
+    memory: 600Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Pod affinity to spread replicas across nodes
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - cluster-autoscaler
+        topologyKey: kubernetes.io/hostname

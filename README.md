@@ -81,6 +81,9 @@ Contains all the Kubernetes add-ons deployed via Helm:
 - ArgoCD for GitOps (Version: 7.8.15)
 - Rancher for cluster management (Version: 2.8.2)
 - External Secrets for managing secrets (Version: 0.9.9)
+- AWS EBS CSI Driver for persistent storage (Version: 2.26.1) - Optional, disabled by default
+- AWS EFS CSI Driver for network file storage (Version: 2.5.2) - Optional, disabled by default
+- Cluster Autoscaler for automatic node scaling (Version: 9.29.3) - Enabled by default
 
 ### Applications Module
 For deploying applications to the cluster:
@@ -134,14 +137,16 @@ This structure helps keep your codebase clean as you add more applications to th
 
 The following component versions are currently deployed:
 
-| Component | Version |
-|-----------|---------|
-| AWS Load Balancer Controller | 1.12.0 |
-| External DNS | 6.20.0 |
-| cert-manager | v1.17.1 |
-| ArgoCD | 7.8.15 |
-| Rancher | 2.8.2 |
-| External Secrets | 0.9.9 |
+| Component | Version | Enabled by Default |
+|-----------|---------|-------------------|
+| AWS Load Balancer Controller | 1.12.0 | Yes |
+| External DNS | 6.20.0 | Yes |
+| cert-manager | v1.17.1 | Yes |
+| ArgoCD | 7.8.15 | Yes |
+| External Secrets | 0.9.9 | Yes |
+| AWS EBS CSI Driver | 2.26.1 | No |
+| AWS EFS CSI Driver | 2.5.2 | No |
+| Cluster Autoscaler | 9.29.3 | Yes |
 
 ## Maintenance
 

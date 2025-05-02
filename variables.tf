@@ -108,3 +108,15 @@ variable "argocd_version" {
   type        = string
   default     = "7.8.15"
 }
+
+variable "cluster_autoscaler_version" {
+  description = "Version of the Kubernetes Cluster Autoscaler"
+  type        = string
+  default     = "9.29.3"
+}
+
+variable "enable_cluster_autoscaler" {
+  description = "Whether to enable the Kubernetes Cluster Autoscaler"
+  type        = bool
+  default     = true
+}
