@@ -108,3 +108,15 @@ variable "argocd_version" {
   type        = string
   default     = "7.8.15"
 }
+
+variable "enable_ebs_csi_driver" {
+  description = "Whether to enable the AWS EBS CSI Driver addon"
+  type        = bool
+  default     = false
+}
+
+variable "enable_efs_csi_driver" {
+  description = "Whether to enable the AWS EFS CSI Driver addon"
+  type        = bool
+  default     = false
+}

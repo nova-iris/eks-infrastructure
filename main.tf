@@ -24,6 +24,8 @@ module "addons" {
   eks_oidc_provider_arn   = module.infrastructure.oidc_provider_arn
   cluster_oidc_issuer_url = module.infrastructure.cluster_oidc_issuer_url
   vpc_id                  = module.infrastructure.vpc_id
+  enable_ebs_csi_driver   = var.enable_ebs_csi_driver
+  enable_efs_csi_driver   = var.enable_efs_csi_driver
 
   depends_on = [module.infrastructure]
 }

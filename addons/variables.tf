@@ -46,3 +46,33 @@ variable "argocd_version" {
   type        = string
   default     = "7.8.15"
 }
+
+variable "external_secrets_version" {
+  description = "Version of External Secrets to install"
+  type        = string
+  default     = "0.9.9"
+}
+
+variable "ebs_csi_driver_version" {
+  description = "Version of AWS EBS CSI Driver to install"
+  type        = string
+  default     = "2.26.1"
+}
+
+variable "enable_ebs_csi_driver" {
+  description = "Whether to enable the AWS EBS CSI Driver"
+  type        = bool
+  default     = false
+}
+
+variable "efs_csi_driver_version" {
+  description = "Version of AWS EFS CSI Driver to install"
+  type        = string
+  default     = "2.5.2"
+}
+
+variable "enable_efs_csi_driver" {
+  description = "Whether to enable the AWS EFS CSI Driver"
+  type        = bool
+  default     = false
+}

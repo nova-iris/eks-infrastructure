@@ -1,0 +1,73 @@
+# AWS EFS CSI Driver Configuration
+
+controller:
+  # Resource settings for controller pods
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+  # Pod security context
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+
+  # Container security context
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # Topology spread constraints
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: efs-csi-controller
+
+node:
+  # Resource settings for node pods
+  resources:
+    limits:
+      cpu: 50m
+      memory: 96Mi
+    requests:
+      cpu: 5m
+      memory: 20Mi
+
+  # Container security context - requires privileged mode for mounting EFS
+  securityContext:
+    privileged: true
+
+# Service account configuration
+serviceAccount:
+  controller:
+    annotations:
+      eks.amazonaws.com/role-arn: ${role_arn}
+
+# Storage class configuration
+storageClasses:
+  - name: efs-sc
+    parameters:
+      provisioningMode: efs-ap
+      fileSystemId: ${efs_file_system_id}
+      directoryPerms: "700"
+      basePath: "/"
+    reclaimPolicy: Delete
+    volumeBindingMode: Immediate
+
+# Enable access points
+volumeBindingMode: Immediate
+mountOptions:
+  - tls
+  - iam
+
+# Controller replica count
+replicaCount: 2
