@@ -28,11 +28,15 @@ eks-infrastructure/
 │   ├── load_balancer_controller.tf  # AWS ALB Controller
 │   ├── cert_manager.tf              # Certificate Manager
 │   ├── external_dns.tf              # External DNS
+│   ├── external_secrets.tf          # External Secrets
 │   ├── argocd.tf                    # ArgoCD
+│   ├── rancher.tf                   # Rancher
 │   ├── variables.tf                 # Add-ons variables
 │   ├── versions.tf                  # Terraform and provider versions
 │   └── values/                      # Helm values files
-│       └── argocd.yaml              # ArgoCD values
+│       ├── argocd.yaml              # ArgoCD values
+│       ├── external-secrets.yaml    # External Secrets values
+│       └── rancher.yaml             # Rancher values
 │
 ├── applications/          # Application deployments
 │   ├── main.tf            # Applications orchestration
@@ -75,6 +79,8 @@ Contains all the Kubernetes add-ons deployed via Helm:
 - External DNS for Route53 integration (Version: 6.20.0)
 - cert-manager for certificate management (Version: v1.17.1)
 - ArgoCD for GitOps (Version: 7.8.15)
+- Rancher for cluster management (Version: 2.8.2)
+- External Secrets for managing secrets (Version: 0.9.9)
 
 ### Applications Module
 For deploying applications to the cluster:
@@ -134,6 +140,8 @@ The following component versions are currently deployed:
 | External DNS | 6.20.0 |
 | cert-manager | v1.17.1 |
 | ArgoCD | 7.8.15 |
+| Rancher | 2.8.2 |
+| External Secrets | 0.9.9 |
 
 ## Maintenance
 

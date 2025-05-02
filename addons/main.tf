@@ -12,3 +12,5 @@ data "aws_route53_zone" "selected" {
 # - External DNS 
 # - Cert Manager
 # - ArgoCD
+# - Rancher
+# - External Secrets
