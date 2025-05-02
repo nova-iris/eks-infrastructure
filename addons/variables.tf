@@ -46,3 +46,15 @@ variable "argocd_version" {
   type        = string
   default     = "7.8.15"
 }
+
+variable "enable_karpenter" {
+  description = "Enable Karpenter autoscaling"
+  type        = bool
+  default     = false
+}
+
+variable "karpenter_version" {
+  description = "Version of Karpenter to install"
+  type        = string
+  default     = "0.35.1"
+}

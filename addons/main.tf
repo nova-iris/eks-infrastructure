@@ -12,3 +12,4 @@ data "aws_route53_zone" "selected" {
 # - External DNS 
 # - Cert Manager
 # - ArgoCD
+# - Karpenter (conditional, based on enable_karpenter variable)

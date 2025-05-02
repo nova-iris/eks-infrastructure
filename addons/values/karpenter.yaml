@@ -1,0 +1,34 @@
+# Karpenter values configuration
+serviceAccount:
+  create: true
+  name: karpenter
+  annotations:
+    eks.amazonaws.com/role-arn: ${ROLE_ARN}
+
+settings:
+  # The cluster-name flag value to use
+  clusterName: ${CLUSTER_NAME}
+  # The AWS region flag value to use 
+  clusterEndpoint: ${CLUSTER_ENDPOINT}
+  # Interrupt baselines
+  interruptionQueueName: ${CLUSTER_NAME}
+
+# Topology configurations for the controller
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# Webhooks configuration
+webhooks:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
