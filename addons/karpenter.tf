@@ -88,9 +88,9 @@ resource "aws_sqs_queue" "karpenter_interruption_queue" {
   count = var.enable_karpenter ? 1 : 0
   name  = "${var.cluster_name}-karpenter-interruption-queue"
 
-  sqs_managed_sse_enabled = true
+  sqs_managed_sse_enabled   = true
   message_retention_seconds = 300
-  
+
   tags = {
     Name = "${var.cluster_name}-karpenter-interruption-queue"
   }
@@ -145,18 +145,18 @@ resource "helm_release" "karpenter" {
   count      = var.enable_karpenter ? 1 : 0
   depends_on = [aws_iam_role_policy_attachment.karpenter_controller]
 
-  name       = "karpenter"
-  repository = "oci://public.ecr.aws/karpenter"
-  chart      = "karpenter"
-  version    = var.karpenter_version
-  namespace  = "karpenter"
+  name             = "karpenter"
+  repository       = "oci://public.ecr.aws/karpenter"
+  chart            = "karpenter"
+  version          = var.karpenter_version
+  namespace        = "karpenter"
   create_namespace = true
 
   # Using template file for more complex values
   values = [
     templatefile("${path.module}/values/karpenter.yaml", {
-      ROLE_ARN        = aws_iam_role.karpenter_controller[0].arn
-      CLUSTER_NAME    = var.cluster_name
+      ROLE_ARN         = aws_iam_role.karpenter_controller[0].arn
+      CLUSTER_NAME     = var.cluster_name
       CLUSTER_ENDPOINT = replace(data.aws_eks_cluster.cluster[0].endpoint, "https://", "")
     })
   ]
@@ -188,7 +188,7 @@ data "aws_eks_cluster" "cluster" {
 
 # Create a default provisioner after Karpenter installation
 resource "kubectl_manifest" "karpenter_provisioner" {
-  count     = var.enable_karpenter ? 1 : 0
+  count      = var.enable_karpenter ? 1 : 0
   depends_on = [helm_release.karpenter]
 
   yaml_body = <<YAML
@@ -229,7 +229,7 @@ resource "aws_cloudwatch_event_rule" "karpenter_interruption_rule" {
   name  = "${var.cluster_name}-karpenter-interruption"
 
   event_pattern = jsonencode({
-    source      = ["aws.ec2"],
+    source = ["aws.ec2"],
     detail-type = [
       "EC2 Spot Instance Interruption Warning",
       "EC2 Instance Rebalance Recommendation",

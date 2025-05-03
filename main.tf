@@ -24,10 +24,10 @@ module "addons" {
   eks_oidc_provider_arn   = module.infrastructure.oidc_provider_arn
   cluster_oidc_issuer_url = module.infrastructure.cluster_oidc_issuer_url
   vpc_id                  = module.infrastructure.vpc_id
-  
+
   # Karpenter configuration
-  enable_karpenter        = var.enable_karpenter
-  karpenter_version       = var.karpenter_version
+  enable_karpenter  = var.enable_karpenter
+  karpenter_version = var.karpenter_version
 
   depends_on = [module.infrastructure]
 }
