@@ -30,6 +30,12 @@ module "addons" {
   cluster_oidc_issuer_url = module.infrastructure.cluster_oidc_issuer_url
   vpc_id                  = module.infrastructure.vpc_id
 
+  # Pass addon versions from root variables
+  cert_manager_version              = var.cert_manager_version
+  external_dns_version              = var.external_dns_version
+  argocd_version                    = var.argocd_version
+  aws_load_balancer_controller_version = var.aws_load_balancer_controller_version
+
   depends_on = [module.infrastructure]
 }
 

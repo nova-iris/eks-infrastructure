@@ -119,7 +119,13 @@ variable "cert_manager_version" {
 variable "external_dns_version" {
   description = "Version of the external-dns Helm chart"
   type        = string
-  default     = "1.14.0"
+  default     = "1.16.1"
+}
+
+variable "aws_load_balancer_controller_version" {
+  description = "Version of the AWS Load Balancer Controller Helm chart"
+  type        = string
+  default     = "1.12.0"
 }
 
 variable "argocd_version" {
