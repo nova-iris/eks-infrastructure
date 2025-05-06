@@ -89,6 +89,25 @@ variable "cluster_addons" {
 variable "route53_hosted_zone_id" {
   description = "ID of the Route53 hosted zone for external-dns"
   type        = string
+  default     = ""
+}
+
+variable "create_route53_zone" {
+  description = "Whether to create a new Route53 hosted zone instead of using an existing one"
+  type        = bool
+  default     = false
+}
+
+variable "domain_name" {
+  description = "Domain name for the Route53 hosted zone to create if create_route53_zone is true"
+  type        = string
+  default     = "novairis.dev"
+}
+
+variable "environment" {
+  description = "Environment name for tagging resources"
+  type        = string
+  default     = "dev"
 }
 
 variable "cert_manager_version" {

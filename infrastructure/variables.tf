@@ -38,4 +38,23 @@ variable "default_tags" {
 variable "route53_hosted_zone_id" {
   description = "ID of the Route53 hosted zone to use"
   type        = string
+  default     = ""
+}
+
+variable "create_route53_zone" {
+  description = "Whether to create a new Route53 hosted zone"
+  type        = bool
+  default     = false
+}
+
+variable "domain_name" {
+  description = "Domain name for the Route53 hosted zone to create"
+  type        = string
+  default     = "novairis.dev"
+}
+
+variable "environment" {
+  description = "Environment name for tagging resources"
+  type        = string
+  default     = "dev"
 }

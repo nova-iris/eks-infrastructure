@@ -12,7 +12,12 @@ module "infrastructure" {
   eks_managed_node_groups = var.eks_managed_node_groups
   cluster_addons          = var.cluster_addons
   default_tags            = var.default_tags
-  route53_hosted_zone_id  = var.route53_hosted_zone_id
+
+  # Route53 configuration
+  route53_hosted_zone_id = var.route53_hosted_zone_id
+  create_route53_zone    = var.create_route53_zone
+  domain_name            = var.domain_name
+  environment            = var.environment
 }
 
 # Cluster add-ons module (Load Balancer Controller, External DNS, Cert Manager, ArgoCD)
