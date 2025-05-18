@@ -29,7 +29,7 @@ variable "cert_manager_version" {
 }
 
 variable "aws_load_balancer_controller_version" {
-  description = "Version of AWS Load Balancer Controller to install" 
+  description = "Version of AWS Load Balancer Controller to install"
   type        = string
 }
 
