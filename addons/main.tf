@@ -14,3 +14,4 @@ data "aws_route53_zone" "selected" {
 # - ArgoCD
 # - Rancher
 # - External Secrets
+# - AWS EBS CSI Driver
