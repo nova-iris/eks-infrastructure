@@ -1,0 +1,56 @@
+## Rancher Server configuration
+
+# Hostname for Rancher
+hostname: rancher.novairis.dev
+
+# Bootstrap admin password
+bootstrapPassword: admin
+
+# Replicas for high availability
+replicas: 2
+
+# Install cert-manager (already installed in our cluster)
+certmanager:
+  install: false
+
+# Ingress configuration
+ingress:
+  enalbled: true
+  ingressClassName: alb
+  pathType: Prefix
+  extraAnnotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+  tls:
+    source: secret
+    secretName: rancher-tls-cert
+
+# # Configure audit logging
+# auditLog:
+#   level: 1
+#   destination: sidecar
+#   maxAge: 1
+#   maxBackup: 1
+#   maxSize: 100
+
+# # Resources for Rancher server
+# resources:
+#   limits:
+#     cpu: 1000m
+#     memory: 1Gi
+#   requests:
+#     cpu: 250m
+#     memory: 512Mi
+
+# Node selector to control where rancher runs
+# nodeSelector:
+#   kubernetes.io/os: linux
+
+# Additional environment variables
+# extraEnv:
+#   # - name: CATTLE_UI_DEFAULT_LANDING
+#   #   value: "cluster-manager"
+#   - name: CATTLE_PROMETHEUS_METRICS
+#     value: "true"

@@ -43,7 +43,11 @@ resource "aws_iam_role_policy_attachment" "argocd" {
 
 # ArgoCD Helm Release - Must come before certificate creation
 resource "helm_release" "argocd" {
-  depends_on = [helm_release.cert_manager]
+  depends_on = [
+    helm_release.cert_manager,
+    data.aws_eks_cluster.this,
+    data.aws_eks_cluster_auth.this
+  ]
 
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"

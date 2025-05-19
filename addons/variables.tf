@@ -72,3 +72,8 @@ variable "enable_efs_csi_driver" {
   type        = bool
   default     = false
 }
+
+variable "rancher_version" {
+  description = "Version of Rancher to install"
+  type        = string
+}
