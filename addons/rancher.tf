@@ -52,37 +52,38 @@ resource "aws_iam_role_policy_attachment" "rancher" {
 }
 
 # Create the Rancher namespace 
-resource "kubernetes_namespace" "rancher" {
-  metadata {
-    name = "cattle-system"
+# resource "kubernetes_namespace" "rancher" {
+#   metadata {
+#     name = "cattle-system"
 
-    labels = {
-      "app.kubernetes.io/managed-by" = "terraform"
-      "app.kubernetes.io/part-of"    = "rancher"
-    }
-  }
-}
+#     labels = {
+#       "app.kubernetes.io/managed-by" = "terraform"
+#       "app.kubernetes.io/part-of"    = "rancher"
+#     }
+#   }
+# }
 
 # Create service account for Rancher
-resource "kubectl_manifest" "rancher_sa" {
-  depends_on = [kubernetes_namespace.rancher]
+# resource "kubectl_manifest" "rancher_sa" {
+#   depends_on = [kubernetes_namespace.rancher]
 
-  yaml_body = <<YAML
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: rancher
-  namespace: cattle-system
-  annotations:
-    eks.amazonaws.com/role-arn: ${aws_iam_role.rancher.arn}
-YAML
-}
+#   yaml_body = <<YAML
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: rancher
+#   namespace: cattle-system
+#   annotations:
+#     eks.amazonaws.com/role-arn: ${aws_iam_role.rancher.arn}
+
+# YAML
+# }
 
 # Deploy Rancher Helm chart
 resource "helm_release" "rancher" {
   depends_on = [
-    helm_release.cert_manager,
-    kubectl_manifest.rancher_sa
+    helm_release.cert_manager
+    # kubectl_manifest.rancher_sa,
   ]
 
   name             = "rancher"
@@ -90,7 +91,7 @@ resource "helm_release" "rancher" {
   chart            = "rancher"
   namespace        = "cattle-system"
   version          = var.rancher_version
-  create_namespace = false
+  create_namespace = true
 
   values = [file("${path.module}/values/rancher.yaml")]
 
@@ -103,10 +104,10 @@ resource "helm_release" "rancher" {
   timeout = 600
 
   # Properly clean up CRDs when removing Rancher
-  provisioner "local-exec" {
-    when    = destroy
-    command = "kubectl -n cattle-system delete ingress,secret,service -l app=rancher || true"
-  }
+  # provisioner "local-exec" {
+  #   when    = destroy
+  #   command = "kubectl -n cattle-system delete ingress,secret,service -l app=rancher || true"
+  # }
 }
 
 # Certificate resource for Rancher
@@ -114,7 +115,7 @@ resource "kubectl_manifest" "rancher_certificate" {
   depends_on = [
     helm_release.cert_manager,
     kubectl_manifest.letsencrypt_staging_issuer,
-    kubernetes_namespace.rancher
+    helm_release.rancher # Added dependency to ensure namespace exists
   ]
 
   yaml_body = <<YAML
@@ -135,24 +136,24 @@ YAML
 }
 
 # Create DNS record for Rancher
-resource "kubectl_manifest" "rancher_dns_record" {
-  depends_on = [
-    helm_release.external_dns,
-    helm_release.rancher
-  ]
+# resource "kubectl_manifest" "rancher_dns_record" {
+#   depends_on = [
+#     helm_release.external_dns,
+#     helm_release.rancher
+#   ]
 
-  yaml_body = <<YAML
-apiVersion: externaldns.k8s.io/v1alpha1
-kind: DNSEndpoint
-metadata:
-  name: rancher-dns-record
-  namespace: cattle-system
-spec:
-  endpoints:
-  - dnsName: rancher.novairis.dev
-    recordTTL: 180
-    recordType: CNAME
-    targets:
-    - ${var.cluster_name}-rancher.elb.${var.aws_region}.amazonaws.com
-YAML
-}
+#   yaml_body = <<YAML
+# apiVersion: externaldns.k8s.io/v1alpha1
+# kind: DNSEndpoint
+# metadata:
+#   name: rancher-dns-record
+#   namespace: cattle-system
+# spec:
+#   endpoints:
+#   - dnsName: rancher.novairis.dev
+#     recordTTL: 180
+#     recordType: CNAME
+#     targets:
+#     - ${var.cluster_name}-rancher.elb.${var.aws_region}.amazonaws.com
+# YAML
+# }

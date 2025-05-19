@@ -33,10 +33,11 @@ module "addons" {
   enable_efs_csi_driver   = var.enable_efs_csi_driver
 
   # Pass addon versions from root variables
+  aws_load_balancer_controller_version = var.aws_load_balancer_controller_version
   cert_manager_version                 = var.cert_manager_version
   external_dns_version                 = var.external_dns_version
   argocd_version                       = var.argocd_version
-  aws_load_balancer_controller_version = var.aws_load_balancer_controller_version
+  rancher_version                      = var.rancher_version
 
   depends_on = [module.infrastructure]
 }

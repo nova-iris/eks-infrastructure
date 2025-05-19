@@ -75,37 +75,36 @@ resource "aws_iam_role_policy_attachment" "external_secrets" {
 }
 
 # Create the External Secrets namespace
-resource "kubernetes_namespace" "external_secrets" {
-  metadata {
-    name = "external-secrets"
+# resource "kubernetes_namespace" "external_secrets" {
+#   metadata {
+#     name = "external-secrets"
 
-    labels = {
-      "app.kubernetes.io/managed-by" = "terraform"
-      "app.kubernetes.io/part-of"    = "external-secrets"
-    }
-  }
-}
+#     labels = {
+#       "app.kubernetes.io/managed-by" = "terraform"
+#       "app.kubernetes.io/part-of"    = "external-secrets"
+#     }
+#   }
+# }
 
 # Create service account for External Secrets
-resource "kubectl_manifest" "external_secrets_sa" {
-  depends_on = [kubernetes_namespace.external_secrets]
+# resource "kubectl_manifest" "external_secrets_sa" {
+#   depends_on = [kubernetes_namespace.external_secrets]
 
-  yaml_body = <<YAML
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: external-secrets
-  namespace: external-secrets
-  annotations:
-    eks.amazonaws.com/role-arn: ${aws_iam_role.external_secrets.arn}
-YAML
-}
+#   yaml_body = <<YAML
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: external-secrets
+#   namespace: external-secrets
+#   annotations:
+#     eks.amazonaws.com/role-arn: ${aws_iam_role.external_secrets.arn}
+# YAML
+# }
 
 # Deploy External Secrets using Helm
 resource "helm_release" "external_secrets" {
   depends_on = [
-    helm_release.cert_manager,
-    kubectl_manifest.external_secrets_sa
+    helm_release.cert_manager
   ]
 
   name             = "external-secrets"
@@ -113,7 +112,7 @@ resource "helm_release" "external_secrets" {
   chart            = "external-secrets"
   namespace        = "external-secrets"
   version          = var.external_secrets_version
-  create_namespace = false
+  create_namespace = true
 
   values = [
     templatefile("${path.module}/values/external-secrets.yaml", {
@@ -128,10 +127,10 @@ resource "helm_release" "external_secrets" {
   }
 
   # Properly clean up CRDs when removing External Secrets
-  provisioner "local-exec" {
-    when    = destroy
-    command = "kubectl delete crd secretstores.external-secrets.io externalsecrets.external-secrets.io clustersecretstores.external-secrets.io || true"
-  }
+  # provisioner "local-exec" {
+  #   when    = destroy
+  #   command = "kubectl delete crd secretstores.external-secrets.io externalsecrets.external-secrets.io clustersecretstores.external-secrets.io || true"
+  # }
 }
 
 # Create example SecretStore for demonstration

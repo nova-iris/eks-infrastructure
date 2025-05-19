@@ -76,11 +76,4 @@ variable "enable_efs_csi_driver" {
 variable "rancher_version" {
   description = "Version of Rancher to install"
   type        = string
-  default     = "2.8.2"
-}
-
-variable "external_secrets_version" {
-  description = "Version of External Secrets to install"
-  type        = string
-  default     = "0.9.9"
 }
