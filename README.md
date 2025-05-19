@@ -28,11 +28,17 @@ eks-infrastructure/
 │   ├── load_balancer_controller.tf  # AWS ALB Controller
 │   ├── cert_manager.tf              # Certificate Manager
 │   ├── external_dns.tf              # External DNS
+│   ├── external_secrets.tf          # External Secrets
+│   ├── ebs_csi_driver.tf            # AWS EBS CSI Driver
+│   ├── efs_csi_driver.tf            # AWS EFS CSI Driver
 │   ├── argocd.tf                    # ArgoCD
 │   ├── variables.tf                 # Add-ons variables
 │   ├── versions.tf                  # Terraform and provider versions
 │   └── values/                      # Helm values files
-│       └── argocd.yaml              # ArgoCD values
+│       ├── argocd.yaml              # ArgoCD values
+│       ├── ebs-csi-driver.yaml      # AWS EBS CSI Driver values
+│       ├── efs-csi-driver.yaml      # AWS EFS CSI Driver values
+│       └── external-secrets.yaml    # External Secrets values
 │
 ├── applications/          # Application deployments
 │   ├── main.tf            # Applications orchestration
@@ -47,7 +53,8 @@ eks-infrastructure/
 │   ├── external_dns.tf             # Backup of External DNS configuration
 │   ├── helm.tf                     # Backup of Helm configuration
 │   ├── load_balancer_controller.tf # Backup of AWS ALB Controller configuration
-│   └── route53.tf                  # Backup of Route53 configuration
+│   ├── ebs_csi_driver.tf           # Backup of AWS EBS CSI Driver configuration
+│   └── efs_csi_driver.tf           # Backup of AWS EFS CSI Driver configuration
 │
 └── modules/               # Reusable modules
     ├── eks/               # EKS module
@@ -75,6 +82,9 @@ Contains all the Kubernetes add-ons deployed via Helm:
 - External DNS for Route53 integration (Version: 6.20.0)
 - cert-manager for certificate management (Version: v1.17.1)
 - ArgoCD for GitOps (Version: 7.8.15)
+- External Secrets for managing secrets (Version: 0.9.9)
+- AWS EBS CSI Driver for persistent storage (Version: 2.26.1) - Optional, disabled by default
+- AWS EFS CSI Driver for network file storage (Version: 2.5.2) - Optional, disabled by default
 
 ### Applications Module
 For deploying applications to the cluster:
@@ -109,6 +119,18 @@ Contains backup copies of previous configurations:
    ```
    terraform apply --auto-approve
    ```
+   
+   To enable storage drivers:
+   ```
+   # Enable EBS CSI Driver
+   terraform apply -var="enable_ebs_csi_driver=true" --auto-approve
+   
+   # Enable EFS CSI Driver
+   terraform apply -var="enable_efs_csi_driver=true" --auto-approve
+   
+   # Enable both storage drivers
+   terraform apply -var="enable_ebs_csi_driver=true" -var="enable_efs_csi_driver=true" --auto-approve
+   ```
 
 5. To destroy the infrastructure:
    ```
@@ -128,12 +150,15 @@ This structure helps keep your codebase clean as you add more applications to th
 
 The following component versions are currently deployed:
 
-| Component | Version |
-|-----------|---------|
-| AWS Load Balancer Controller | 1.12.0 |
-| External DNS | 6.20.0 |
-| cert-manager | v1.17.1 |
-| ArgoCD | 7.8.15 |
+| Component | Version | Enabled by Default |
+|-----------|---------|-------------------|
+| AWS Load Balancer Controller | 1.12.0 | Yes |
+| External DNS | 6.20.0 | Yes |
+| cert-manager | v1.17.1 | Yes |
+| ArgoCD | 7.8.15 | Yes |
+| External Secrets | 0.9.9 | Yes |
+| AWS EBS CSI Driver | 2.26.1 | No |
+| AWS EFS CSI Driver | 2.5.2 | No |
 
 ## Maintenance
 

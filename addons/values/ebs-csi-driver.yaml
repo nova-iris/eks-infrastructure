@@ -1,0 +1,98 @@
+# AWS EBS CSI Driver Configuration
+
+controller:
+  # Enables shared mount on hostPath volume for controller pod
+  # Required for kind clusters that use hostPath volume for CSI driver
+  hostNetwork: false
+
+  # Resource settings for controller pods
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 40Mi
+
+  # Pod security context
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+
+  # Container security context
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # Topology spread constraints
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: ebs-csi-controller
+
+node:
+  # Resource settings for node pods
+  resources:
+    limits:
+      cpu: 50m
+      memory: 96Mi
+    requests:
+      cpu: 5m
+      memory: 20Mi
+
+  # Pod security context
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+
+  # Container security context
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    privileged: true
+    capabilities:
+      drop:
+        - ALL
+
+# Service account configuration
+serviceAccount:
+  controller:
+    annotations:
+      eks.amazonaws.com/role-arn: ${role_arn}
+
+# Storage class configuration
+storageClasses:
+  - name: ebs-sc
+    annotations:
+      storageclass.kubernetes.io/is-default-class: "true"
+    parameters:
+      type: gp3
+      encrypted: "true"
+      fsType: ext4
+    reclaimPolicy: Delete
+    volumeBindingMode: WaitForFirstConsumer
+    allowVolumeExpansion: true
+
+# Enable volume snapshots
+volumeSnapshotClasses:
+  - name: ebs-snapshot-class
+    annotations:
+      snapshot.storage.kubernetes.io/is-default-class: "true"
+    deletionPolicy: Delete
+    parameters:
+      description: "EBS volume snapshot created by AWS EBS CSI driver"
+
+# Controller replica count
+replicaCount: 2
+
+# Enable volume resizing
+enableVolumeResizing: true
+
+# Enable volume snapshot
+enableVolumeSnapshot: true
