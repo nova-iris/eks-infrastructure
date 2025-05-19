@@ -1,0 +1,23 @@
+aws_region = "us-east-1"
+
+# KodeKcloud account
+aws_access_key = "<AWS_ACCESS_KEY>"
+aws_secret_key = "<AWS_SECRET_KEY>"
+
+cluster_name = "nova-iris-eks"
+vpc_cidr     = "10.24.0.0/16"
+
+# These values shouldn't be needed as they are outputs from your VPC module
+# vpc_id      = "vpc-xxxxxxxxxxxxxxxxx"
+# subnet_ids  = []
+
+default_tags = {
+  Environment = "development"
+  Project     = "vtd-devops"
+  Name        = "trong.truong"
+  CreatedBy   = "terraform"
+}
+
+route53_hosted_zone_id = "<ROUTE53_HOSTED_ZONE_ID>"
+create_route53_zone    = true
+domain_name            = "novairis.dev"

@@ -56,27 +56,68 @@ resource "aws_iam_role_policy_attachment" "external_dns" {
 }
 
 # Explicitly create service account for external-dns
-resource "kubectl_manifest" "external_dns_sa" {
-  yaml_body = <<YAML
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: external-dns
-  namespace: kube-system
-  annotations:
-    eks.amazonaws.com/role-arn: ${aws_iam_role.external_dns.arn}
-YAML
-}
+# resource "kubectl_manifest" "external_dns_sa" {
+#   yaml_body = <<YAML
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: external-dns
+#   namespace: kube-system
+#   annotations:
+#     eks.amazonaws.com/role-arn: ${aws_iam_role.external_dns.arn}
+# YAML
+# }
+
+# resource "helm_release" "external_dns" {
+#   depends_on = [aws_iam_role_policy_attachment.external_dns]
+
+#   name       = "external-dns"
+#   repository = "https://kubernetes-sigs.github.io/external-dns/"
+#   chart      = "external-dns"
+#   namespace  = "kube-system"
+#   version    = var.external_dns_version
+#   # create_namespace = true
+
+#   set {
+#     name  = "provider"
+#     value = "aws"
+#   }
+
+#   set {
+#     name  = "aws.region"
+#     value = var.aws_region
+#   }
+
+#   # set {
+#   #   name  = "domainFilters[0]"
+#   #   value = "novairis.dev"
+#   # }
+
+#   # set {
+#   #   name  = "policy"
+#   #   value = "sync"
+#   # }
+
+#   # set {
+#   #   name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+#   #   value = aws_iam_role.external_dns.arn
+#   # }
+
+#   # set {
+#   #   name  = "txtOwnerId"
+#   #   value = var.cluster_name
+#   # }
+# }
+
 
 resource "helm_release" "external_dns" {
   depends_on = [aws_iam_role_policy_attachment.external_dns]
 
-  name             = "external-dns"
-  repository       = "https://kubernetes-sigs.github.io/external-dns/"
-  chart            = "external-dns"
-  namespace        = "kube-system"
-  version          = var.external_dns_version
-  create_namespace = true
+  name       = "external-dns"
+  repository = "https://kubernetes-sigs.github.io/external-dns/"
+  chart      = "external-dns"
+  namespace  = "kube-system"
+  version    = var.external_dns_version
 
   set {
     name  = "provider"
@@ -89,13 +130,13 @@ resource "helm_release" "external_dns" {
   }
 
   set {
-    name  = "domainFilters[0]"
-    value = "novairis.dev"
+    name  = "serviceAccount.create"
+    value = "true"
   }
 
   set {
-    name  = "policy"
-    value = "sync"
+    name  = "serviceAccount.name"
+    value = "external-dns"
   }
 
   set {
@@ -103,8 +144,19 @@ resource "helm_release" "external_dns" {
     value = aws_iam_role.external_dns.arn
   }
 
-  set {
-    name  = "txtOwnerId"
-    value = var.cluster_name
-  }
+  # Uncomment these if needed
+  # set {
+  #   name  = "domainFilters[0]"
+  #   value = "novairis.dev"
+  # }
+
+  # set {
+  #   name  = "policy"
+  #   value = "sync"
+  # }
+
+  # set {
+  #   name  = "txtOwnerId"
+  #   value = var.cluster_name
+  # }
 }

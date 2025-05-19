@@ -56,10 +56,10 @@ output "public_subnets" {
 
 output "route53_zone_name" {
   description = "Name of the selected Route53 hosted zone"
-  value       = data.aws_route53_zone.selected.name
+  value       = local.route53_zone_name
 }
 
 output "route53_zone_id" {
   description = "ID of the selected Route53 hosted zone"
-  value       = data.aws_route53_zone.selected.id
+  value       = local.route53_zone_id
 }
