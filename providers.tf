@@ -50,5 +50,5 @@ provider "kubectl" {
   host                   = module.infrastructure.cluster_endpoint
   cluster_ca_certificate = base64decode(module.infrastructure.cluster_certificate_authority_data)
   token                  = module.infrastructure.cluster_token
-  load_config_file       = false
+  load_config_file       = true
 }
